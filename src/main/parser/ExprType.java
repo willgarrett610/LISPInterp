@@ -1,4 +1,4 @@
-package main.expr.parser;
+package main.parser;
 
 public enum ExprType {
 

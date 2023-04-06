@@ -9,6 +9,10 @@ public class SExpr extends Expr {
 
     private List<Expr> children;
 
+    public SExpr(List<Expr> children) {
+        this.children = children;
+    }
+
     @Override
     public Value evaluate() {
         return null;

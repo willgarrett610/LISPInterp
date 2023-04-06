@@ -1,6 +1,7 @@
-package main.expr.parser;
+package main.parser;
 
 import main.expr.Expr;
+import main.expr.SExpr;
 import main.expr.Symbol;
 import main.expr.value.Literal;
 import main.expr.value.Number;
@@ -37,6 +38,15 @@ public class Parser {
             case SYMBOL: {
                 String name = stripped;
                 return new Symbol(name);
+            }
+            case SEXPR: {
+                String listString = stripped;
+                List<String> split = splitList(listString);
+                List<Expr> elmts = new ArrayList<>();
+                for (String s : split) {
+                    elmts.add(parse(s));
+                }
+                return new SExpr(elmts);
             }
         }
 
