@@ -16,19 +16,19 @@ public class Parser {
     private static final String WHITESPACE = "[\\s]+";
     private static final String LIST = "'\\(.*\\)";
     private static final String LITERAL = "'.+";
-    private static final String NUMBER = "[0-9]+\\.?[0-9]*";
+    private static final String NUMBER = "[0-9]+";
     private static final String SEXPR = "\\(.*\\)";
     private static final String SYMBOL = "[^\\d\\s]+\\S*";
 
     public static Expr parse(String exprString) {
-        System.out.println();
+//        System.out.println();
         // TODO values with spaces outside of list eg: 12 .345
         String stripped = exprString.toUpperCase().replaceAll(WHITESPACE, " ");
         stripped = stripped.stripLeading().stripTrailing();
 
         ExprType exprType = getType(stripped);
 
-        System.out.println("\"" + stripped + "\": " + exprType);
+//        System.out.println("\"" + stripped + "\": " + exprType);
 
         switch (exprType) {
             case INVALID: {
@@ -46,6 +46,7 @@ public class Parser {
                 for (String s : split) {
                     elmts.add(parse(s));
                 }
+                if (elmts.size() == 0) return Literal.NIL;
                 return new SExpr(elmts);
             }
         }
@@ -68,14 +69,14 @@ public class Parser {
     private static Value parseValue(String valueString, ExprType exprType) {
         switch (exprType) {
             case NUMBER: {
-                double value = Double.parseDouble(valueString);
+                int value = Integer.parseInt(valueString);
                 return new Number(value);
             }
             case LITERAL: {
                 // TODO: Check constant literals
                 String value = valueString.substring(1);
                 if (value.matches(NUMBER)) {
-                    double numValue = Double.parseDouble(value);
+                    int numValue = Integer.parseInt(value);
                     return new Number(numValue);
                 }
                 return new Literal(value);
@@ -87,6 +88,7 @@ public class Parser {
                 for (String s : split) {
                     values.add(parseValue(s));
                 }
+                if (values.size() == 0) return Literal.NIL;
                 return new SList(values);
             }
         }

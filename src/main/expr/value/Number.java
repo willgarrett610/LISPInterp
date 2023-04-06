@@ -1,9 +1,13 @@
 package main.expr.value;
 
-public class Number extends Value<Double> {
+public class Number extends Value<Integer> {
 
-    public Number(Double value) {
+    public Number(Integer value) {
         super(value);
     }
 
+    @Override
+    public String getType() {
+        return "NUMBER";
+    }
 }

@@ -1,5 +1,6 @@
 package main.expr;
 
+import main.Environment;
 import main.expr.value.Value;
 
 public class Symbol extends Expr {
@@ -10,9 +11,14 @@ public class Symbol extends Expr {
         this.name = name;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     @Override
-    public Value evaluate() {
-        return null;
+    public Value evaluate(Environment environment) {
+        Value value = environment.getValue(this.name);
+        return value;
     }
 
     @Override
