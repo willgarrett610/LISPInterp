@@ -1,6 +1,7 @@
 package main.expr;
 
 import main.Environment;
+import main.expr.value.Literal;
 import main.expr.value.Value;
 
 public class Symbol extends Expr {
@@ -17,6 +18,8 @@ public class Symbol extends Expr {
 
     @Override
     public Value evaluate(Environment environment) {
+        if (this.name == "T") return new Literal("T");
+
         Value value = environment.getValue(this.name);
         return value;
     }

@@ -1,9 +1,9 @@
 package main;
 
+import main.error.FunctionException;
 import main.expr.value.Literal;
 import main.expr.value.SList;
 import main.function.Function;
-import main.function.LispFunction;
 import main.expr.value.Value;
 import main.expr.value.Number;
 
@@ -80,13 +80,28 @@ public class Environment {
         return value;
     }
 
-    public Function getFunction(String name) {
+    public void setVariable(String name, Value value) {
+        this.variables.put(name, value);
+    }
+
+    public boolean variableExists(String name) {
+        return this.variables.containsKey(name);
+    }
+
+    public boolean functionExists(String name) {
+        return this.functions.containsKey(name);
+    }
+
+    public Function getFunction(String name) throws FunctionException {
         Function function = this.functions.get(name);
         if (function == null) {
-            System.err.println("No function " + name + " found");
-            return null;
+            throw new FunctionException("No function found: " + name);
         }
         return function;
+    }
+
+    public void setFunction(String name, Function function) {
+        this.functions.put(name, function);
     }
 
 }

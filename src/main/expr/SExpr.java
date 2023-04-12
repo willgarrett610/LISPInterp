@@ -1,6 +1,7 @@
 package main.expr;
 
 import main.Environment;
+import main.error.FunctionException;
 import main.expr.value.Literal;
 import main.expr.value.Value;
 import main.function.Function;
@@ -11,30 +12,33 @@ import java.util.stream.Collectors;
 
 public class SExpr extends Expr {
 
-    private List<Expr> children;
+    final private List<Expr> children;
 
     public SExpr(List<Expr> children) {
         this.children = children;
     }
 
+    public List<Expr> getChildren() {
+        return this.children;
+    }
+
     @Override
-    public Value evaluate(Environment environment) {
+    public Value evaluate(Environment environment) throws FunctionException {
         Expr funcNameVal = children.get(0);
         if (!(funcNameVal instanceof Symbol)) {
             // TODO: Error handling
-            System.err.println("Function name must be a symbol");
-            return null;
+            throw new FunctionException("Function name is not a symbol: " + funcNameVal.toString());
         }
 
-        List<Value> params = new ArrayList<>();
+        List<Expr> params = new ArrayList<>();
         for (int i = 1; i < children.size(); i++) {
             Expr child = children.get(i);
-            params.add(child.evaluate(environment));
+            params.add(child);
         }
 
         Function function = environment.getFunction(((Symbol) funcNameVal).getName());
 
-        if (function == null) return null;
+        if (function == null) return Literal.NIL;
 
         return function.evaluate(environment, params);
     }

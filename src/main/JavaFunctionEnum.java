@@ -1,22 +1,35 @@
 package main;
 
+import main.error.FunctionException;
+import main.expr.Expr;
+import main.expr.SExpr;
+import main.expr.Symbol;
+import main.expr.value.Literal;
 import main.expr.value.Number;
+import main.expr.value.Value;
 import main.function.Function;
 import main.function.JavaFunction;
 import main.function.JavaFunctionMethod;
+import main.function.LispFunction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public enum JavaFunctionEnum {
 
-    ADD("+", JavaFunctionImpl.add, "A", "B");
+    IFF("IF", JavaFunctionImpl.iff, false),
+    DEFINE("DEFINE", JavaFunctionImpl.define, false),
+    SET("SET!", JavaFunctionImpl.set, false),
+    DEFUN("DEFUN", JavaFunctionImpl.defun, false),
+    ADD("+", JavaFunctionImpl.add, true, "A", "B");
 
-    public String symbol;
-    public JavaFunction function;
+    final public String symbol;
+    final public JavaFunction function;
 
-    JavaFunctionEnum(String symbol, JavaFunctionMethod method, String... paramNames) {
+    JavaFunctionEnum(String symbol, JavaFunctionMethod method, boolean evaluateParams, String... paramNames) {
         this.symbol = symbol;
-        this.function = new JavaFunction(method, paramNames);
+        this.function = new JavaFunction(method, evaluateParams, paramNames);
     }
 
     public static void addFunctionsToMap(HashMap<String, Function> functions) {
@@ -29,7 +42,104 @@ public enum JavaFunctionEnum {
 
 class JavaFunctionImpl {
 
-    protected static final JavaFunctionMethod add = e -> {
+    private static Symbol enforceSymbol(Expr expr) throws FunctionException {
+        if (!(expr instanceof Symbol symbol)) {
+            throw new FunctionException(expr.toString() + " is not a symbol");
+        }
+
+        return symbol;
+    }
+
+    private static SExpr enforceSExpr(Expr expr) throws FunctionException {
+        if (!(expr instanceof SExpr sExpr)) {
+            throw new FunctionException(expr.toString() + " is not an s-expression");
+        }
+
+        return sExpr;
+    }
+
+    protected static final JavaFunctionMethod iff = (e, params) -> {
+        if (params.size() < 2) {
+            throw new FunctionException("IF requires at least 2 arguments: " + params.size() + " given");
+        }
+        Expr condition = params.get(0);
+        if (condition != Literal.NIL) {
+            // TRUE
+            Expr trueExpr = params.get(1);
+            return trueExpr.evaluate(e);
+        } else if (params.size() >= 3){
+            // FALSE
+            Expr falseExpr = params.get(2);
+            return falseExpr.evaluate(e);
+        }
+        return Literal.NIL;
+    };
+
+    protected static final JavaFunctionMethod define = (e, params) -> {
+        // TODO: Error handling
+        Expr nameExpr = params.get(0);
+        Symbol name = enforceSymbol(params.get(0));
+
+        if (e.variableExists(name.getName())) {
+            System.err.println("Variable " + name + " already exists");
+            return null;
+        }
+
+        Value value = params.get(1).evaluate(e);
+
+        e.setVariable(name.getName(), value);
+
+        return new Literal(name.getName());
+    };
+
+    protected static final JavaFunctionMethod set = (e, params) -> {
+        // TODO: Error handling
+        Symbol name = enforceSymbol(params.get(0));
+
+        if (!e.variableExists(name.getName())) {
+            System.err.println("Variable " + name + " does not exists");
+            return null;
+        }
+
+        Value value = params.get(1).evaluate(e);
+
+        e.setVariable(name.getName(), value);
+
+        return new Literal(name.getName());
+    };
+
+    protected static final JavaFunctionMethod defun = (e, params) -> {
+        // TODO: Error handling
+        Symbol name = enforceSymbol(params.get(0));
+
+        if (e.functionExists(name.getName())) {
+            throw new FunctionException("Function already exists: " + name);
+        }
+
+        SExpr paramNameSExpr = enforceSExpr(params.get(1));
+
+        List<Expr> paramNameExprs = paramNameSExpr.getChildren();
+        List<String> paramNames = new ArrayList<>();
+
+        for (Expr pNameExpr : paramNameExprs) {
+            Symbol pNameSymb = enforceSymbol(pNameExpr);
+            paramNames.add(pNameSymb.getName());
+        }
+
+        List<Expr> bodyExprList = params.subList(2, params.size());
+        List<SExpr> body = new ArrayList<>();
+        for (Expr bodyExpr : bodyExprList) {
+            SExpr bodySExpr = enforceSExpr(bodyExpr);
+            body.add(bodySExpr);
+        }
+
+        LispFunction function = new LispFunction(paramNames, body);
+        e.setFunction(name.getName(), function);
+
+        return new Literal(name.getName());
+    };
+
+    protected static final JavaFunctionMethod add = (e, __) -> {
         Number a = e.getNumber("A");
         Number b = e.getNumber("B");
         return new Number(a.getValue() + b.getValue());

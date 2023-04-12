@@ -1,25 +1,33 @@
 package main.function;
 
 import main.Environment;
+import main.error.FunctionException;
 import main.expr.Expr;
 import main.expr.SExpr;
 import main.expr.value.Value;
 
-import java.util.HashMap;
 import java.util.List;
 
-public class LispFunction extends SExpr implements Function {
+public class LispFunction implements Function {
 
     List<String> paramNames;
+    List<SExpr> lines;
 
-    public LispFunction(List<String> paramNames, List<Expr> children) {
-        super(children);
+    public LispFunction(List<String> paramNames, List<SExpr> lines) {
         this.paramNames = paramNames;
+        this.lines = lines;
     }
 
-    public Value evaluate(Environment environment, List<Value> params) {
-        environment = environment.addVariables(paramNames, params);
-        return super.evaluate(environment);
+    public Value evaluate(Environment environment, List<Expr> params) throws FunctionException {
+        List<Value> paramValues = Expr.evaluateAll(environment, params);
+        environment = environment.addVariables(paramNames, paramValues);
+
+        Value returnValue = null;
+        for (SExpr line : lines) {
+            returnValue = line.evaluate(environment);
+        }
+
+        return returnValue;
     }
 
 }
