@@ -22,7 +22,8 @@ public enum JavaFunctionEnum {
     DEFINE("DEFINE", JavaFunctionImpl.define, false),
     SET("SET!", JavaFunctionImpl.set, false),
     DEFUN("DEFUN", JavaFunctionImpl.defun, false),
-    ADD("+", JavaFunctionImpl.add, true, "A", "B");
+    ADD("+", JavaFunctionImpl.add, true, "A", "B"),
+    SUB("-", JavaFunctionImpl.sub, true, "A", "B");
 
     final public String symbol;
     final public JavaFunction function;
@@ -59,8 +60,9 @@ class JavaFunctionImpl {
     }
 
     protected static final JavaFunctionMethod iff = (e, params) -> {
+        System.out.println(params.size());
         if (params.size() < 2) {
-            throw new FunctionException("IF requires at least 2 arguments: " + params.size() + " given");
+            throw new FunctionException("IF requires either 2 or 3 arguments: " + params.size() + " given");
         }
         Expr condition = params.get(0);
         if (condition != Literal.NIL) {
@@ -143,6 +145,12 @@ class JavaFunctionImpl {
         Number a = e.getNumber("A");
         Number b = e.getNumber("B");
         return new Number(a.getValue() + b.getValue());
+    };
+
+    protected static final JavaFunctionMethod sub = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+        return new Number(a.getValue() - b.getValue());
     };
 
 }

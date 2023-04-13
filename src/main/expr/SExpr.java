@@ -26,7 +26,6 @@ public class SExpr extends Expr {
     public Value evaluate(Environment environment) throws FunctionException {
         Expr funcNameVal = children.get(0);
         if (!(funcNameVal instanceof Symbol)) {
-            // TODO: Error handling
             throw new FunctionException("Function name is not a symbol: " + funcNameVal.toString());
         }
 
