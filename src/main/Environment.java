@@ -1,6 +1,6 @@
 package main;
 
-import main.error.FunctionException;
+import main.error.LispException;
 import main.expr.value.Literal;
 import main.expr.value.SList;
 import main.function.Function;
@@ -92,10 +92,10 @@ public class Environment {
         return this.functions.containsKey(name);
     }
 
-    public Function getFunction(String name) throws FunctionException {
+    public Function getFunction(String name) throws LispException {
         Function function = this.functions.get(name);
         if (function == null) {
-            throw new FunctionException("No function found: " + name);
+            throw new LispException("No function found: " + name);
         }
         return function;
     }

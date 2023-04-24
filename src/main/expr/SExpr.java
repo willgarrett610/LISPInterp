@@ -1,7 +1,7 @@
 package main.expr;
 
 import main.Environment;
-import main.error.FunctionException;
+import main.error.LispException;
 import main.expr.value.Literal;
 import main.expr.value.Value;
 import main.function.Function;
@@ -23,10 +23,10 @@ public class SExpr extends Expr {
     }
 
     @Override
-    public Value evaluate(Environment environment) throws FunctionException {
+    public Value evaluate(Environment environment) throws LispException {
         Expr funcNameVal = children.get(0);
         if (!(funcNameVal instanceof Symbol)) {
-            throw new FunctionException("Function name is not a symbol: " + funcNameVal.toString());
+            throw new LispException("Function name is not a symbol: " + funcNameVal.toString());
         }
 
         List<Expr> params = new ArrayList<>();

@@ -1,6 +1,6 @@
 package main;
 
-import main.error.FunctionException;
+import main.error.LispException;
 import main.expr.Expr;
 import main.expr.value.Literal;
 import main.expr.value.Value;
@@ -21,7 +21,7 @@ public class Interpreter {
         Value result = Literal.NIL;
         try {
             result = expr.evaluate(this.environment);
-        } catch (FunctionException e) {
+        } catch (LispException e) {
             System.err.println(e.getMessage());
         }
         return result;

@@ -1,7 +1,7 @@
 package main.function;
 
 import main.Environment;
-import main.error.FunctionException;
+import main.error.LispException;
 import main.expr.Expr;
 import main.expr.value.Value;
 
@@ -20,7 +20,7 @@ public class JavaFunction implements Function {
     }
 
     @Override
-    public Value evaluate(Environment environment, List<Expr> params) throws FunctionException {
+    public Value evaluate(Environment environment, List<Expr> params) throws LispException {
         if (this.evaluateParams) {
             List<Value> paramValues = Expr.evaluateAll(environment, params);
             environment = environment.addVariables(paramNames, paramValues);

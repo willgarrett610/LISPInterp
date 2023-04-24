@@ -1,6 +1,6 @@
 package main;
 
-import main.error.FunctionException;
+import main.error.LispException;
 import main.expr.Expr;
 import main.expr.SExpr;
 import main.expr.Symbol;
@@ -23,7 +23,10 @@ public enum JavaFunctionEnum {
     SET("SET!", JavaFunctionImpl.set, false),
     DEFUN("DEFUN", JavaFunctionImpl.defun, false),
     ADD("+", JavaFunctionImpl.add, true, "A", "B"),
-    SUB("-", JavaFunctionImpl.sub, true, "A", "B");
+    SUB("-", JavaFunctionImpl.sub, true, "A", "B"),
+    MULT("*", JavaFunctionImpl.MULT, true, "A", "B"),
+    DIV("/", JavaFunctionImpl.DIV, true, "A", "B");
+//    CAR("CAR", JavaFunctionImpl.CAR, true);
 
     final public String symbol;
     final public JavaFunction function;
@@ -43,26 +46,33 @@ public enum JavaFunctionEnum {
 
 class JavaFunctionImpl {
 
-    private static Symbol enforceSymbol(Expr expr) throws FunctionException {
+    private static Symbol enforceSymbol(Expr expr) throws LispException {
         if (!(expr instanceof Symbol symbol)) {
-            throw new FunctionException(expr.toString() + " is not a symbol");
+            throw new LispException(expr.toString() + " is not a symbol");
         }
 
         return symbol;
     }
 
-    private static SExpr enforceSExpr(Expr expr) throws FunctionException {
+    private static SExpr enforceSExpr(Expr expr) throws LispException {
         if (!(expr instanceof SExpr sExpr)) {
-            throw new FunctionException(expr.toString() + " is not an s-expression");
+            throw new LispException(expr.toString() + " is not an s-expression");
         }
 
         return sExpr;
     }
 
+    private static boolean checkOverflow(long val) {
+        if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
+            return true;
+        }
+        return false;
+    }
+
     protected static final JavaFunctionMethod iff = (e, params) -> {
         System.out.println(params.size());
         if (params.size() < 2) {
-            throw new FunctionException("IF requires either 2 or 3 arguments: " + params.size() + " given");
+            throw new LispException("IF requires either 2 or 3 arguments: " + params.size() + " given");
         }
         Expr condition = params.get(0);
         if (condition != Literal.NIL) {
@@ -115,7 +125,7 @@ class JavaFunctionImpl {
         Symbol name = enforceSymbol(params.get(0));
 
         if (e.functionExists(name.getName())) {
-            throw new FunctionException("Function already exists: " + name);
+            throw new LispException("Function already exists: " + name);
         }
 
         SExpr paramNameSExpr = enforceSExpr(params.get(1));
@@ -142,15 +152,43 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod add = (e, __) -> {
-        Number a = e.getNumber("A");
-        Number b = e.getNumber("B");
-        return new Number(a.getValue() + b.getValue());
+        long a = e.getNumber("A").getValue();
+        long b = e.getNumber("B").getValue();
+
+        long out = a + b;
+
+        if (checkOverflow(out)) throw new LispException("Integer overflow");
+
+        return new Number((int) out);
     };
 
     protected static final JavaFunctionMethod sub = (e, __) -> {
+        long a = e.getNumber("A").getValue();
+        long b = e.getNumber("B").getValue();
+
+        long out = a - b;
+
+        if (checkOverflow(out)) throw new LispException("Integer overflow");
+
+        return new Number((int) out);
+    };
+
+    protected static final JavaFunctionMethod MULT = (e, __) -> {
+        long a = e.getNumber("A").getValue();
+        long b = e.getNumber("B").getValue();
+
+        long out = a * b;
+
+        if (checkOverflow(out)) throw new LispException("Integer overflow");
+
+        return new Number((int) out);
+    };
+
+    protected static final JavaFunctionMethod DIV = (e, __) -> {
         Number a = e.getNumber("A");
         Number b = e.getNumber("B");
-        return new Number(a.getValue() - b.getValue());
+        if (b.getValue() == 0) throw new LispException("Dividing by zero!");
+        return new Number(Math.floorDiv(a.getValue(), b.getValue()));
     };
 
 }
