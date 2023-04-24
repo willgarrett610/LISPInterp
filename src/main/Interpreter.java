@@ -22,6 +22,7 @@ public class Interpreter {
         try {
             result = expr.evaluate(this.environment);
         } catch (LispException e) {
+            e.printStackTrace();
             System.err.println(e.getMessage());
         }
         return result;

@@ -25,6 +25,11 @@ public class Symbol extends Expr {
     }
 
     @Override
+    public String getType() {
+        return "SYMBOL";
+    }
+
+    @Override
     public String toString() {
         return name;
     }

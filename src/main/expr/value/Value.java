@@ -3,7 +3,7 @@ package main.expr.value;
 import main.Environment;
 import main.expr.Expr;
 
-public class Value<T> extends Expr {
+public abstract class Value<T> extends Expr {
 
     T value;
 
@@ -23,10 +23,6 @@ public class Value<T> extends Expr {
     public void setValue(T value) {
         this.value = value;
     }
-
-    public String getType() {
-        return null;
-    };
 
     @Override
     public String toString() {

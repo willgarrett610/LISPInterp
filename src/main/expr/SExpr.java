@@ -24,6 +24,8 @@ public class SExpr extends Expr {
 
     @Override
     public Value evaluate(Environment environment) throws LispException {
+        if (children.size() == 0) return Literal.NIL;
+
         Expr funcNameVal = children.get(0);
         if (!(funcNameVal instanceof Symbol)) {
             throw new LispException("Function name is not a symbol: " + funcNameVal.toString());
@@ -40,6 +42,11 @@ public class SExpr extends Expr {
         if (function == null) return Literal.NIL;
 
         return function.evaluate(environment, params);
+    }
+
+    @Override
+    public String getType() {
+        return "S-EXPR";
     }
 
     @Override

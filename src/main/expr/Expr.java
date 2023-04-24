@@ -19,4 +19,6 @@ public abstract class Expr {
         return out;
     }
 
+    public abstract String getType();
+
 }

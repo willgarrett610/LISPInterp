@@ -16,7 +16,7 @@ public class Parser {
     private static final String WHITESPACE = "[\\s]+";
     private static final String LIST = "'\\(.*\\)";
     private static final String LITERAL = "'.+";
-    private static final String NUMBER = "[0-9]+";
+    private static final String NUMBER = "-?[0-9]+";
     private static final String SEXPR = "\\(.*\\)";
     private static final String SYMBOL = "[^\\d\\s]+\\S*";
 
@@ -37,6 +37,11 @@ public class Parser {
             }
             case SYMBOL: {
                 String name = stripped;
+
+                if (name.equalsIgnoreCase("T")) {
+                    return Literal.T;
+                }
+
                 return new Symbol(name);
             }
             case SEXPR: {
@@ -46,7 +51,6 @@ public class Parser {
                 for (String s : split) {
                     elmts.add(parse(s));
                 }
-                if (elmts.size() == 0) return Literal.NIL;
                 return new SExpr(elmts);
             }
         }
@@ -88,7 +92,6 @@ public class Parser {
                 for (String s : split) {
                     values.add(parseValue(s));
                 }
-                if (values.size() == 0) return Literal.NIL;
                 return new SList(values);
             }
         }

@@ -6,6 +6,7 @@ import main.expr.SExpr;
 import main.expr.Symbol;
 import main.expr.value.Literal;
 import main.expr.value.Number;
+import main.expr.value.SList;
 import main.expr.value.Value;
 import main.function.Function;
 import main.function.JavaFunction;
@@ -22,18 +23,29 @@ public enum JavaFunctionEnum {
     DEFINE("DEFINE", JavaFunctionImpl.define, false),
     SET("SET!", JavaFunctionImpl.set, false),
     DEFUN("DEFUN", JavaFunctionImpl.defun, false),
-    ADD("+", JavaFunctionImpl.add, true, "A", "B"),
-    SUB("-", JavaFunctionImpl.sub, true, "A", "B"),
-    MULT("*", JavaFunctionImpl.MULT, true, "A", "B"),
-    DIV("/", JavaFunctionImpl.DIV, true, "A", "B");
-//    CAR("CAR", JavaFunctionImpl.CAR, true);
+    ADD("+", JavaFunctionImpl.add, true, true, "A", "B"),
+    SUB("-", JavaFunctionImpl.sub, true, true, "A", "B"),
+    MULT("*", JavaFunctionImpl.mult, true, true, "A", "B"),
+    DIV("/", JavaFunctionImpl.div, true, true, "A", "B"),
+    CAR("CAR", JavaFunctionImpl.car, true, "L"),
+    CDR("CDR", JavaFunctionImpl.cdr, true, "L"),
+    CONS("CONS", JavaFunctionImpl.cons, true, "A", "B"),
+    SQRT("SQRT", JavaFunctionImpl.sqrt, true, "A"),
+    POW("POW", JavaFunctionImpl.pow, true, "A", "B"),
+    GT(">", JavaFunctionImpl.gt, true, "A", "B"),
+    LT("<", JavaFunctionImpl.lt, true, "A", "B");
 
     final public String symbol;
     final public JavaFunction function;
 
+    JavaFunctionEnum(String symbol, JavaFunctionMethod method, boolean binaryCascade, boolean evaluateParams, String... paramNames) {
+        this.symbol = symbol;
+        this.function = new JavaFunction(method, binaryCascade, evaluateParams, paramNames);
+    }
+
     JavaFunctionEnum(String symbol, JavaFunctionMethod method, boolean evaluateParams, String... paramNames) {
         this.symbol = symbol;
-        this.function = new JavaFunction(method, evaluateParams, paramNames);
+        this.function = new JavaFunction(method, false, evaluateParams, paramNames);
     }
 
     public static void addFunctionsToMap(HashMap<String, Function> functions) {
@@ -173,7 +185,7 @@ class JavaFunctionImpl {
         return new Number((int) out);
     };
 
-    protected static final JavaFunctionMethod MULT = (e, __) -> {
+    protected static final JavaFunctionMethod mult = (e, __) -> {
         long a = e.getNumber("A").getValue();
         long b = e.getNumber("B").getValue();
 
@@ -184,11 +196,83 @@ class JavaFunctionImpl {
         return new Number((int) out);
     };
 
-    protected static final JavaFunctionMethod DIV = (e, __) -> {
+    protected static final JavaFunctionMethod div = (e, __) -> {
         Number a = e.getNumber("A");
         Number b = e.getNumber("B");
         if (b.getValue() == 0) throw new LispException("Dividing by zero!");
         return new Number(Math.floorDiv(a.getValue(), b.getValue()));
+    };
+
+    protected static final JavaFunctionMethod car = (e, __) -> {
+        SList sList = e.getSList("L");
+
+        List<Value> list = sList.getValue();
+
+        if (list.size() == 0) return Literal.NIL;
+
+        return list.get(0);
+    };
+
+    protected static final JavaFunctionMethod cdr = (e, __) -> {
+        SList sList = e.getSList("L");
+
+        List<Value> list = sList.getValue();
+
+        if (list.size() == 0) return Literal.NIL;
+
+//        if (sList.atomCons && list.size() == 2) {
+//            return
+//        }
+
+        return new SList(list.subList(1,list.size()));
+    };
+
+    protected static final JavaFunctionMethod cons = (e, __) -> {
+        Value arg1 = e.getValue("A");
+        Value arg2 = e.getValue("B");
+
+        if (arg2 instanceof SList sList) {
+            List<Value> value = sList.getValue();
+            value.add(0, arg1);
+            return new SList(value, sList.atomCons);
+        }
+
+        List<Value> value = new ArrayList<>();
+        value.add(arg1);
+        value.add(arg2);
+
+        return new SList(value, true);
+    };
+
+    protected static final JavaFunctionMethod sqrt = (e, __) -> {
+        Number a = e.getNumber("A");
+
+        int value = (int) Math.floor(Math.sqrt(a.getValue()));
+
+        return new Number(value);
+    };
+
+    protected static final JavaFunctionMethod pow = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        int value = (int) Math.pow(a.getValue(), b.getValue());
+
+        return new Number(value);
+    };
+
+    protected static final JavaFunctionMethod gt = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() > b.getValue());
+    };
+
+    protected static final JavaFunctionMethod lt = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() < b.getValue());
     };
 
 }
