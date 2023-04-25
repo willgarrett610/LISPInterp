@@ -1,12 +1,13 @@
 package main.expr;
 
 import main.Environment;
+import main.error.LispException;
 import main.expr.value.Literal;
 import main.expr.value.Value;
 
 public class Symbol extends Expr {
 
-    private String name;
+    private final String name;
 
     public Symbol(String name) {
         this.name = name;
@@ -17,11 +18,10 @@ public class Symbol extends Expr {
     }
 
     @Override
-    public Value evaluate(Environment environment) {
-        if (this.name == "T") return new Literal("T");
+    public Value<?> evaluate(Environment environment) throws LispException {
+        if (this.name.equalsIgnoreCase("T")) return new Literal("T");
 
-        Value value = environment.getValue(this.name);
-        return value;
+        return environment.getValue(this.name);
     }
 
     @Override

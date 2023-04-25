@@ -18,11 +18,18 @@ public class LispFunction implements Function {
         this.lines = lines;
     }
 
-    public Value evaluate(Environment environment, List<Expr> params) throws LispException {
+    public Value<?> evaluate(Environment environment, List<Expr> params) throws LispException {
         List<Value> paramValues = Expr.evaluateAll(environment, params);
-        environment = environment.addVariables(paramNames, paramValues);
 
-        Value returnValue = null;
+        if (paramNames.size() != paramValues.size()) {
+            String message = String
+                    .format("Expected %d arguments but got %d", paramNames.size(), paramValues.size());
+            throw new LispException(message);
+        }
+
+        environment = environment.addFunctionParams(paramNames, paramValues);
+
+        Value<?> returnValue = null;
         for (SExpr line : lines) {
             returnValue = line.evaluate(environment);
         }

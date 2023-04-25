@@ -3,49 +3,55 @@ package main.expr.value;
 import main.Environment;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class SList extends Value<List<Value>> {
+public class SList extends Value<ListElement> {
 
-    public boolean atomCons = false;
-
-    public SList(List<Value> values) {
-        super(values);
-    }
-
-    public SList(List<Value> values, boolean atomCons) {
-        super(values);
-        this.atomCons = atomCons;
+    public SList(ListElement value) {
+        super(value);
     }
 
     @Override
-    public List<Value> getValue() {
+    public ListElement getValue() {
         return super.getValue();
     }
 
     @Override
-    public Value evaluate(Environment environment) {
-        if (value.size() == 0) return Literal.NIL;
+    public Value<?> evaluate(Environment environment) {
         return this;
+    }
+
+    public static SList fromList(List<Value<?>> values) {
+        SList curr = null;
+        for (int i = values.size() - 1; i >= 0; i--) {
+            Value<?> value = values.get(i);
+            ListElement elmt = new ListElement(value, curr);
+            curr = new SList(elmt);
+        }
+        return curr;
     }
 
     @Override
     public String toString() {
         StringBuilder vBuilder = new StringBuilder("(");
 
-        for (int i = 0; i < value.size(); i++) {
-            Value elmt = value.get(i);
+        // Start traversal
+        Value<?> curr = this;
 
-            if (atomCons && i == value.size() - 1) {
-                vBuilder.append(". ");
+        do {
+            if (!(curr instanceof SList sList)) {
+                vBuilder.append(". ").append(curr.getValue());
+                curr = null;
+                continue;
             }
 
-            vBuilder.append(elmt.toString());
+            Value<?> elmt = sList.value.elmt;
 
-            if (i != value.size() - 1) {
-                vBuilder.append(" ");
-            }
-        }
+            vBuilder.append(elmt.getValue().toString());
+
+            if (sList.value.getNext() != null) vBuilder.append(" ");
+
+            curr = sList.value.next;
+        } while (curr != null);
 
         return vBuilder.append(")").toString();
     }

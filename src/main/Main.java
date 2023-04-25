@@ -1,27 +1,35 @@
 package main;
 
+import main.expr.value.Literal;
 import main.expr.value.Value;
 import main.parser.Parser;
 
+import java.io.*;
+import java.util.Formatter;
 import java.util.Scanner;
+import java.util.logging.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        Interpreter interpreter = new Interpreter();
+        BufferedWriter fileOut = null;
+        try {
+            fileOut = new BufferedWriter(new FileWriter("./results.file"));
+        } catch (IOException e) {
+            System.err.println("Could not open \"./results.file\" for logging");
+            System.err.println("Continuing without... :(");
+        }
 
-        Scanner in = new Scanner(System.in);
+        Interpreter interpreter = new Interpreter(fileOut);
+        interpreter.start();
 
-        System.out.print("WILLISP V1.0\n>");
-        do {
-            String line = in.nextLine();
-            Value value = interpreter.evaluate(line);
-            System.out.println(value);
-            System.out.print(">");
-        } while (in.hasNext());
-        System.out.println("Exiting...");
+        if (fileOut == null) return;
 
-        in.close();
+        try {
+            fileOut.close();
+        } catch (IOException e) {
+            System.err.println("Could not write outputs to \"./results.file\"");
+        }
 
 //        System.out.println(Parser.parse("(defun f (var s 'l))"));
 //        System.out.println(Parser.parse("var*"));
@@ -35,4 +43,5 @@ public class Main {
 //        System.out.println(Parser.parse("'(a( b d c (  k))'(f))"));
 //        System.out.println(Parser.parse("'('a b c)"));
     }
+
 }

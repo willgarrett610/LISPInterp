@@ -1,17 +1,11 @@
-package main;
+package main.function;
 
 import main.error.LispException;
 import main.expr.Expr;
 import main.expr.SExpr;
 import main.expr.Symbol;
-import main.expr.value.Literal;
+import main.expr.value.*;
 import main.expr.value.Number;
-import main.expr.value.SList;
-import main.expr.value.Value;
-import main.function.Function;
-import main.function.JavaFunction;
-import main.function.JavaFunctionMethod;
-import main.function.LispFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +27,15 @@ public enum JavaFunctionEnum {
     SQRT("SQRT", JavaFunctionImpl.sqrt, true, "A"),
     POW("POW", JavaFunctionImpl.pow, true, "A", "B"),
     GT(">", JavaFunctionImpl.gt, true, "A", "B"),
-    LT("<", JavaFunctionImpl.lt, true, "A", "B");
+    LT("<", JavaFunctionImpl.lt, true, "A", "B"),
+    EQ("==", JavaFunctionImpl.eq, true, "A", "B"),
+    GEQ(">=", JavaFunctionImpl.geq, true, "A", "B"),
+    LEQ("<=", JavaFunctionImpl.leq, true, "A", "B"),
+    NEQ("!=", JavaFunctionImpl.neq, true, "A", "B"),
+    AND("AND", JavaFunctionImpl.and, true, "A", "B"),
+    OR("OR", JavaFunctionImpl.or, true, "A", "B"),
+    NOT("NOT", JavaFunctionImpl.not, true, "A"),
+    QUIT("QUIT", JavaFunctionImpl.quit, true);
 
     final public String symbol;
     final public JavaFunction function;
@@ -75,10 +77,7 @@ class JavaFunctionImpl {
     }
 
     private static boolean checkOverflow(long val) {
-        if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
-            return true;
-        }
-        return false;
+        return (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE);
     }
 
     protected static final JavaFunctionMethod iff = (e, params) -> {
@@ -100,40 +99,35 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod define = (e, params) -> {
-        // TODO: Error handling
         Expr nameExpr = params.get(0);
         Symbol name = enforceSymbol(params.get(0));
 
         if (e.variableExists(name.getName())) {
-            System.err.println("Variable " + name + " already exists");
-            return null;
+            throw new LispException("Variable " + name + " already exists");
         }
 
-        Value value = params.get(1).evaluate(e);
+        Value<?> value = params.get(1).evaluate(e);
 
         e.setVariable(name.getName(), value);
 
-        return new Literal(name.getName());
+        return value;
     };
 
     protected static final JavaFunctionMethod set = (e, params) -> {
-        // TODO: Error handling
         Symbol name = enforceSymbol(params.get(0));
 
         if (!e.variableExists(name.getName())) {
-            System.err.println("Variable " + name + " does not exists");
-            return null;
+            throw new LispException("Variable " + name + " does not exists");
         }
 
-        Value value = params.get(1).evaluate(e);
+        Value<?> value = params.get(1).evaluate(e);
 
         e.setVariable(name.getName(), value);
 
-        return new Literal(name.getName());
+        return value;
     };
 
     protected static final JavaFunctionMethod defun = (e, params) -> {
-        // TODO: Error handling
         Symbol name = enforceSymbol(params.get(0));
 
         if (e.functionExists(name.getName())) {
@@ -206,42 +200,21 @@ class JavaFunctionImpl {
     protected static final JavaFunctionMethod car = (e, __) -> {
         SList sList = e.getSList("L");
 
-        List<Value> list = sList.getValue();
-
-        if (list.size() == 0) return Literal.NIL;
-
-        return list.get(0);
+        return sList.getValue().getElmt();
     };
 
     protected static final JavaFunctionMethod cdr = (e, __) -> {
         SList sList = e.getSList("L");
 
-        List<Value> list = sList.getValue();
-
-        if (list.size() == 0) return Literal.NIL;
-
-//        if (sList.atomCons && list.size() == 2) {
-//            return
-//        }
-
-        return new SList(list.subList(1,list.size()));
+        return sList.getValue().getNext();
     };
 
     protected static final JavaFunctionMethod cons = (e, __) -> {
-        Value arg1 = e.getValue("A");
-        Value arg2 = e.getValue("B");
+        Value<?> arg1 = e.getValue("A");
+        Value<?> arg2 = e.getValue("B");
 
-        if (arg2 instanceof SList sList) {
-            List<Value> value = sList.getValue();
-            value.add(0, arg1);
-            return new SList(value, sList.atomCons);
-        }
-
-        List<Value> value = new ArrayList<>();
-        value.add(arg1);
-        value.add(arg2);
-
-        return new SList(value, true);
+        ListElement listElement = new ListElement(arg1, arg2);
+        return new SList(listElement);
     };
 
     protected static final JavaFunctionMethod sqrt = (e, __) -> {
@@ -273,6 +246,70 @@ class JavaFunctionImpl {
         Number b = e.getNumber("B");
 
         return Literal.fromBool(a.getValue() < b.getValue());
+    };
+
+    protected static final JavaFunctionMethod eq = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() == b.getValue());
+    };
+
+    protected static final JavaFunctionMethod geq = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() >= b.getValue());
+    };
+
+    protected static final JavaFunctionMethod leq = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() <= b.getValue());
+    };
+
+    protected static final JavaFunctionMethod neq = (e, __) -> {
+        Number a = e.getNumber("A");
+        Number b = e.getNumber("B");
+
+        return Literal.fromBool(a.getValue() != b.getValue());
+    };
+
+    protected static final JavaFunctionMethod and = (e, __) -> {
+        Value a = e.getValue("A");
+        Value b = e.getValue("B");
+
+        if (a.equals(Literal.NIL)) {
+            return a;
+        }
+
+        return b;
+    };
+
+    protected static final JavaFunctionMethod or = (e, __) -> {
+        Value a = e.getValue("A");
+        Value b = e.getValue("B");
+
+        if (a.equals(Literal.NIL)) {
+            return b;
+        }
+
+        return a;
+    };
+
+    protected static final JavaFunctionMethod not = (e, __) -> {
+        Value a = e.getValue("A");
+
+        if (a.equals(Literal.NIL)) {
+            return Literal.T;
+        }
+
+        return Literal.NIL;
+    };
+
+    protected static final JavaFunctionMethod quit = (___, __) -> {
+        return null;
     };
 
 }

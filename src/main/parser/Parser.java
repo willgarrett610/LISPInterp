@@ -1,5 +1,6 @@
 package main.parser;
 
+import main.error.ParsingException;
 import main.expr.Expr;
 import main.expr.SExpr;
 import main.expr.Symbol;
@@ -20,7 +21,7 @@ public class Parser {
     private static final String SEXPR = "\\(.*\\)";
     private static final String SYMBOL = "[^\\d\\s]+\\S*";
 
-    public static Expr parse(String exprString) {
+    public static Expr parse(String exprString) throws ParsingException {
 //        System.out.println();
         // TODO values with spaces outside of list eg: 12 .345
         String stripped = exprString.toUpperCase().replaceAll(WHITESPACE, " ");
@@ -32,14 +33,17 @@ public class Parser {
 
         switch (exprType) {
             case INVALID: {
-                System.err.println("Invalid expression");
-                return null;
+                throw new ParsingException("Invalid expression");
             }
             case SYMBOL: {
                 String name = stripped;
 
                 if (name.equalsIgnoreCase("T")) {
                     return Literal.T;
+                }
+
+                if (name.equalsIgnoreCase("NIL")) {
+                    return Literal.NIL;
                 }
 
                 return new Symbol(name);
@@ -58,7 +62,7 @@ public class Parser {
         return parseValue(stripped, exprType);
     }
 
-    private static Value parseValue(String valueString) {
+    private static Value parseValue(String valueString) throws ParsingException {
         ExprType exprType = getType(valueString);
         if (exprType == ExprType.SEXPR) {
             exprType = ExprType.LIST;
@@ -70,14 +74,13 @@ public class Parser {
         return parseValue(valueString, exprType);
     }
 
-    private static Value parseValue(String valueString, ExprType exprType) {
+    private static Value<?> parseValue(String valueString, ExprType exprType) throws ParsingException {
         switch (exprType) {
             case NUMBER: {
                 int value = Integer.parseInt(valueString);
                 return new Number(value);
             }
             case LITERAL: {
-                // TODO: Check constant literals
                 String value = valueString.substring(1);
                 if (value.matches(NUMBER)) {
                     int numValue = Integer.parseInt(value);
@@ -88,11 +91,11 @@ public class Parser {
             case LIST: {
                 String listString = valueString.substring(1);
                 List<String> split = splitList(listString);
-                List<Value> values = new ArrayList<>();
+                List<Value<?>> values = new ArrayList<>();
                 for (String s : split) {
                     values.add(parseValue(s));
                 }
-                return new SList(values);
+                return SList.fromList(values);
             }
         }
         return null;
@@ -125,11 +128,9 @@ public class Parser {
         return -1;
     }
 
-    private static List<String> splitList(String listString) {
+    private static List<String> splitList(String listString) throws ParsingException {
         String stripped = listString.substring(1,listString.length()-1);
         stripped = stripped.stripLeading().stripTrailing();
-
-//        System.out.println("Stripped: " + stripped);
 
         List<String> elmts = new ArrayList<>();
 
@@ -146,8 +147,7 @@ public class Parser {
             if (c == '(') {
                 int closing = getClosingIndex(stripped, i);
                 if (closing == -1) {
-                    System.err.println("Closing parenthesis not found");
-                    return null;
+                    throw new ParsingException("Closing parenthesis not found");
                 }
 
                 int j = i;

@@ -13,3 +13,5 @@ out/
 *.iml
 *.ipr
 *.iws
+
+results.file

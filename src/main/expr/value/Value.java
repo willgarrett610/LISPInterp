@@ -12,7 +12,7 @@ public abstract class Value<T> extends Expr {
     }
 
     @Override
-    public Value evaluate(Environment environment) {
+    public Value<?> evaluate(Environment environment) {
         return this;
     }
 

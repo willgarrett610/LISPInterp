@@ -10,4 +10,5 @@ public class Number extends Value<Integer> {
     public String getType() {
         return "NUMBER";
     }
+
 }
