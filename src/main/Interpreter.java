@@ -84,7 +84,7 @@ public class Interpreter {
             output(value + "\n");
             output(">");
         } while (in.hasNext());
-        output("Exiting...");
+        output("Exiting...\n");
 
         in.close();
     }

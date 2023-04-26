@@ -61,19 +61,19 @@ public enum JavaFunctionEnum {
 class JavaFunctionImpl {
 
     private static Symbol enforceSymbol(Expr expr) throws LispException {
-        if (!(expr instanceof Symbol symbol)) {
+        if (!(expr instanceof Symbol)) {
             throw new LispException(expr.toString() + " is not a symbol");
         }
 
-        return symbol;
+        return (Symbol) expr;
     }
 
     private static SExpr enforceSExpr(Expr expr) throws LispException {
-        if (!(expr instanceof SExpr sExpr)) {
+        if (!(expr instanceof SExpr)) {
             throw new LispException(expr.toString() + " is not an s-expression");
         }
 
-        return sExpr;
+        return (SExpr) expr;
     }
 
     private static boolean checkOverflow(long val) {

@@ -20,14 +20,18 @@ public class SList extends Value<ListElement> {
         return this;
     }
 
+    // Constructs linked list from java List
     public static SList fromList(List<Value<?>> values) {
-        SList curr = null;
+        SList head = null;
+        // Loops backwards through list
         for (int i = values.size() - 1; i >= 0; i--) {
             Value<?> value = values.get(i);
-            ListElement elmt = new ListElement(value, curr);
-            curr = new SList(elmt);
+            // Link new item to the list
+            ListElement elmt = new ListElement(value, head);
+            // Update head pointer
+            head = new SList(elmt);
         }
-        return curr;
+        return head;
     }
 
     @Override
@@ -38,11 +42,13 @@ public class SList extends Value<ListElement> {
         Value<?> curr = this;
 
         do {
-            if (!(curr instanceof SList sList)) {
+            if (!(curr instanceof SList)) {
                 vBuilder.append(". ").append(curr.getValue());
                 curr = null;
                 continue;
             }
+
+            SList sList = (SList) curr;
 
             Value<?> elmt = sList.value.elmt;
 
