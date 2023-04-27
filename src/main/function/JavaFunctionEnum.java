@@ -99,7 +99,6 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod define = (e, params) -> {
-        Expr nameExpr = params.get(0);
         Symbol name = enforceSymbol(params.get(0));
 
         if (e.variableExists(name.getName())) {
@@ -277,8 +276,8 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod and = (e, __) -> {
-        Value a = e.getValue("A");
-        Value b = e.getValue("B");
+        Value<?> a = e.getValue("A");
+        Value<?> b = e.getValue("B");
 
         if (a.equals(Literal.NIL)) {
             return a;
@@ -288,8 +287,8 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod or = (e, __) -> {
-        Value a = e.getValue("A");
-        Value b = e.getValue("B");
+        Value<?> a = e.getValue("A");
+        Value<?> b = e.getValue("B");
 
         if (a.equals(Literal.NIL)) {
             return b;
@@ -299,7 +298,7 @@ class JavaFunctionImpl {
     };
 
     protected static final JavaFunctionMethod not = (e, __) -> {
-        Value a = e.getValue("A");
+        Value<?> a = e.getValue("A");
 
         if (a.equals(Literal.NIL)) {
             return Literal.T;

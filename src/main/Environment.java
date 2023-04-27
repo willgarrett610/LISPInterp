@@ -13,7 +13,7 @@ import java.util.List;
 
 public class Environment {
 
-    HashMap<String, Value> variables;
+    HashMap<String, Value<?>> variables;
     HashMap<String, Function> functions;
 
     public Environment() {
@@ -23,9 +23,9 @@ public class Environment {
     }
 
     @SuppressWarnings("unchecked")
-    public Environment addFunctionParams(List<String> names, List<Value> values) {
+    public Environment addFunctionParams(List<String> names, List<Value<?>> values) {
         Environment environment = new Environment();
-        environment.variables = (HashMap<String, Value>) this.variables.clone();
+        environment.variables = (HashMap<String, Value<?>>) this.variables.clone();
         environment.functions = (HashMap<String, Function>) this.functions.clone();
 
         for (int i = 0; i < names.size(); i++) {
@@ -68,7 +68,7 @@ public class Environment {
         return value;
     }
 
-    public void setVariable(String name, Value value) {
+    public void setVariable(String name, Value<?> value) {
         this.variables.put(name, value);
     }
 

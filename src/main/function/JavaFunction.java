@@ -23,12 +23,12 @@ public class JavaFunction implements Function {
     }
 
     @Override
-    public Value evaluate(Environment environment, List<Expr> params) throws LispException {
+    public Value<?> evaluate(Environment environment, List<Expr> params) throws LispException {
         if (this.binaryCascade && params.size() != 2) {
             if (params.size() < 2) {
                 throw new LispException("Function needs at least 2 parameters");
             }
-            Value out = evaluate(environment, params.subList(0,2));
+            Value<?> out = evaluate(environment, params.subList(0,2));
 
             for (int i = 2; i < params.size(); i++) {
                 List<Expr> cParams = new ArrayList<>();
@@ -43,7 +43,7 @@ public class JavaFunction implements Function {
             return out;
         }
         if (this.evaluateParams) {
-            List<Value> paramValues = Expr.evaluateAll(environment, params);
+            List<Value<?>> paramValues = Expr.evaluateAll(environment, params);
 
             if (paramNames.size() != paramValues.size()) {
                 String message = String

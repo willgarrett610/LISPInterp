@@ -10,7 +10,6 @@ import main.parser.Parser;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Scanner;
-import java.util.logging.Logger;
 
 public class Interpreter {
 

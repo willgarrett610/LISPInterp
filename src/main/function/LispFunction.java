@@ -19,7 +19,7 @@ public class LispFunction implements Function {
     }
 
     public Value<?> evaluate(Environment environment, List<Expr> params) throws LispException {
-        List<Value> paramValues = Expr.evaluateAll(environment, params);
+        List<Value<?>> paramValues = Expr.evaluateAll(environment, params);
 
         if (paramNames.size() != paramValues.size()) {
             String message = String

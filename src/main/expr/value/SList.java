@@ -15,11 +15,6 @@ public class SList extends Value<ListElement> {
         return super.getValue();
     }
 
-    @Override
-    public Value<?> evaluate(Environment environment) {
-        return this;
-    }
-
     // Constructs linked list from java List
     public static SList fromList(List<Value<?>> values) {
         SList head = null;

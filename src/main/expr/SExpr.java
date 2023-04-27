@@ -23,7 +23,7 @@ public class SExpr extends Expr {
     }
 
     @Override
-    public Value evaluate(Environment environment) throws LispException {
+    public Value<?> evaluate(Environment environment) throws LispException {
         if (children.size() == 0) return Literal.NIL;
 
         Expr funcNameVal = children.get(0);
@@ -52,7 +52,7 @@ public class SExpr extends Expr {
     @Override
     public String toString() {
         String values = children.stream()
-                .map(val -> val.toString())
+                .map(Expr::toString)
                 .collect(Collectors.joining(" ", "(", ")"));
         return "'" + values;
     }

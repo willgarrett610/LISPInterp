@@ -9,10 +9,10 @@ import java.util.List;
 
 public abstract class Expr {
 
-    public abstract Value evaluate(Environment environment) throws LispException;
+    public abstract Value<?> evaluate(Environment environment) throws LispException;
 
-    public static List<Value> evaluateAll(Environment environment, List<Expr> exprList) throws LispException {
-        List<Value> out = new ArrayList<>();
+    public static List<Value<?>> evaluateAll(Environment environment, List<Expr> exprList) throws LispException {
+        List<Value<?>> out = new ArrayList<>();
         for (Expr expr : exprList) {
             out.add(expr.evaluate(environment));
         }

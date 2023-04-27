@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Parser {
 
-    private static final String WHITESPACE = "[\\s]+";
+    private static final String WHITESPACE = "\\s+";
     private static final String LIST = "'\\(.*\\)";
     private static final String LITERAL = "'.+";
     private static final String NUMBER = "-?[0-9]+";
@@ -36,21 +36,18 @@ public class Parser {
                 throw new ParsingException("Invalid expression");
             }
             case SYMBOL: {
-                String name = stripped;
-
-                if (name.equalsIgnoreCase("T")) {
+                if (stripped.equalsIgnoreCase("T")) {
                     return Literal.T;
                 }
 
-                if (name.equalsIgnoreCase("NIL")) {
+                if (stripped.equalsIgnoreCase("NIL")) {
                     return Literal.NIL;
                 }
 
-                return new Symbol(name);
+                return new Symbol(stripped);
             }
             case SEXPR: {
-                String listString = stripped;
-                List<String> split = splitList(listString);
+                List<String> split = splitList(stripped);
                 List<Expr> elmts = new ArrayList<>();
                 for (String s : split) {
                     elmts.add(parse(s));
@@ -62,7 +59,7 @@ public class Parser {
         return parseValue(stripped, exprType);
     }
 
-    private static Value parseValue(String valueString) throws ParsingException {
+    private static Value<?> parseValue(String valueString) throws ParsingException {
         ExprType exprType = getType(valueString);
         if (exprType == ExprType.SEXPR) {
             exprType = ExprType.LIST;

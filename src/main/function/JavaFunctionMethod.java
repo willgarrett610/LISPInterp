@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface JavaFunctionMethod {
 
-    public Value evaluate(Environment environment, List<Expr> params) throws LispException;
+    Value<?> evaluate(Environment environment, List<Expr> params) throws LispException;
 
 }
